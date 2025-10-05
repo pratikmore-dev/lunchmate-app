@@ -1,2 +1,12 @@
-{/* <h1 className="text-3xl font-bold text-blue-600">Hello Tailwind!</h1> */}
-<h1>hi</h1>
+import MainLayout from './components/layout/MainLayout';
+import DashboardPage from './pages/Dashboard/DashboardPage';
+
+function App() {
+  return (
+    <MainLayout>
+      <DashboardPage />
+    </MainLayout>
+  );
+}
+
+export default App;
