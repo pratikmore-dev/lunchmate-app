@@ -18,6 +18,7 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
+import MenuTable from "./pages/Menu/MenuTable";
 
 export default function App() {
   return (
@@ -39,7 +40,8 @@ export default function App() {
 
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />
-
+            {/* {<MenuTable />} */}
+            <Route path="/menu-table" element={<MenuTable />} />
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/avatars" element={<Avatars />} />
