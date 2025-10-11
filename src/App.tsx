@@ -19,6 +19,8 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import MenuTable from "./pages/Menu/MenuTable";
+import OrderHistory from "./pages/OrderHistory/OrderHistory";
+import MenuManagement from "./pages/MenuManagement/MenuManagement";
 
 export default function App() {
   return (
@@ -37,7 +39,10 @@ export default function App() {
 
             {/* Forms */}
             <Route path="/form-elements" element={<FormElements />} />
-
+            {/* order table */}
+            <Route path="/order-history" element={<OrderHistory/>}/>
+{/* menu management table - admin only access*/}
+            <Route path="/menu-management" element={<MenuManagement/>}/>
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />
             {/* {<MenuTable />} */}

@@ -47,6 +47,15 @@ const navItems: NavItem[] = [
     path:"/menu-table"
   },
   {
+    icon:<ListIcon/>,
+    name:"Order History",
+    path:"/order-history"
+  },
+  { icon:<ListIcon/>,
+    name:"Menu Management",
+    path:"/menu-management"
+  },
+  {
     name: "Tables",
     icon: <TableIcon />,
     subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
