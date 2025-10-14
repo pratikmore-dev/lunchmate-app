@@ -5,8 +5,6 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-
- import Badge from "../../components/ui/badge/Badge";
 import { useState } from "react";
 
 interface MenuItem {

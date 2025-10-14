@@ -21,6 +21,9 @@ import Home from "./pages/Dashboard/Home";
 import MenuTable from "./pages/Menu/MenuTable";
 import OrderHistory from "./pages/OrderHistory/OrderHistory";
 import MenuManagement from "./pages/MenuManagement/MenuManagement";
+import EmployeeMasterScreen from "./pages/MasterScreens/EmployeeMasterScreen";
+import FoodStoreMasterScreen from "./pages/MasterScreens/FoodStoreMasterScreen";
+import FoodCategoryMasterScreen from "./pages/MasterScreens/FoodCategoryMasterScreen";
 
 export default function App() {
   return (
@@ -41,12 +44,18 @@ export default function App() {
             <Route path="/form-elements" element={<FormElements />} />
             {/* order table */}
             <Route path="/order-history" element={<OrderHistory/>}/>
-{/* menu management table - admin only access*/}
+            {/* menu management table - admin only access*/}
             <Route path="/menu-management" element={<MenuManagement/>}/>
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />
             {/* {<MenuTable />} */}
             <Route path="/menu-table" element={<MenuTable />} />
+            {/* employee table */}
+            <Route path="/employees" element={<EmployeeMasterScreen />} />
+            {/* food store table */}
+            <Route path="/food_stores" element={<FoodStoreMasterScreen />} />
+            {/* food category table */}
+            <Route path="/food_categories" element={<FoodCategoryMasterScreen />} />
             {/* Ui Elements */}
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/avatars" element={<Avatars />} />
