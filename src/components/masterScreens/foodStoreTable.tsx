@@ -296,7 +296,7 @@ export default function FoodStoreTable() {
   <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
     <div className="px-2 pr-14">
       <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-        Add New Menu
+        Add Food Store
       </h4>
     </div>
     <form className="flex flex-col">
@@ -309,36 +309,36 @@ export default function FoodStoreTable() {
           <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
             <div>
               <Label>Store Name</Label>
-              <select className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
-                <option value="">Select Store</option>
-                <option value="shree-ganesh-food">Shree Ganesh Food</option>
-                <option value="shree-ganesh-snacks">Shree Ganesh Snacks</option>
-              </select>
+               <Input type="text" placeholder="Enter store name" />
             </div>
 
             <div>
-              <Label>Category</Label>
-              <select className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white">
-                <option value="">Select Category</option>
-                <option value="regular-thali">Regular Thali</option>
-                <option value="chinese">Chinese</option>
-                <option value="snacks">Snacks</option>
-              </select>
+              <Label>First Name</Label>
+              <Input type="text" placeholder="Enter owner first name" />
             </div>
 
             <div className="col-span-2">
-              <Label>Menu Name</Label>
-              <Input type="text" placeholder="Enter menu name" />
+              <Label>Last Name</Label>
+              <Input type="text" placeholder="Enter owner last name" />
             </div>
 
             <div>
-              <Label>Full Price</Label>
-              <Input type="text" placeholder="₹" />
+              <Label>Contact Number</Label>
+              <Input type="text" placeholder="Enter contact number" />
             </div>
 
             <div>
-              <Label>Half Price (Optional)</Label>
-              <Input type="text" placeholder="₹" />
+              <Label>Email Address</Label>
+              <Input type="email" placeholder="Enter email address" />
+            </div>
+            <div>
+              <Label>Address</Label>
+              <Input type="text" placeholder="Enter store address" />
+            </div>
+
+            <div>
+              <Label>Shop Address</Label>
+              <Input type="text" placeholder="Enter shop address" />
             </div>
           </div>
         </div>
