@@ -18,12 +18,13 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
-import MenuTable from "./pages/Menu/MenuTable";
+import Menu from "./pages/Menu/Menu";
 import OrderHistory from "./pages/OrderHistory/OrderHistory";
 import MenuManagement from "./pages/MenuManagement/MenuManagement";
 import EmployeeMasterScreen from "./pages/MasterScreens/EmployeeMasterScreen";
 import FoodStoreMasterScreen from "./pages/MasterScreens/FoodStoreMasterScreen";
 import FoodCategoryMasterScreen from "./pages/MasterScreens/FoodCategoryMasterScreen";
+import MennuPage from "./pages/MenuPage/MenuPage";
 
 export default function App() {
   return (
@@ -49,7 +50,8 @@ export default function App() {
             {/* Tables */}
             <Route path="/basic-tables" element={<BasicTables />} />
             {/* {<MenuTable />} */}
-            <Route path="/menu-table" element={<MenuTable />} />
+            <Route path="/menu-table" element={<Menu />} />
+            <Route path="/menu-page-table" element={<MennuPage />} />
             {/* employee table */}
             <Route path="/employees" element={<EmployeeMasterScreen />} />
             {/* food store table */}
