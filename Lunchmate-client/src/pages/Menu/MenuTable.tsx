@@ -5,7 +5,9 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import MultiSelect from "../../../src/components/form/MultiSelect";
+
 
 interface MenuItem {
   id: number;
@@ -128,9 +130,93 @@ export default function MenuTable() {
     );
   };
 
+    // const [selectedValues, setSelectedValues] = useState<string[]>([]);
+
+  const multiOptions = [
+    { value: "1", text: "Option 1", selected: false },
+    { value: "2", text: "Option 2", selected: false },
+    { value: "3", text: "Option 3", selected: false },
+    { value: "4", text: "Option 4", selected: false },
+    { value: "5", text: "Option 5", selected: false },
+  ];
+
+const [selectedValues, setSelectedValues] = useState<string[]>(["1", "3"]);
+const inputRef = useRef<HTMLInputElement>(null);
+const [singleValue, setSingleValue] = useState<string>("");
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+
+
+
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
       <div className="max-w-full overflow-x-auto">
+        
+            {/* Dropdowns Section */}
+    <div className="grid grid-cols-3 gap-4 p-4">
+      {/* <div>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Search or type command..."
+                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[330px]"
+                />
+      </div> */}
+       <div>
+          <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+            Search
+          </label>
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Search..."
+            className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-4 pr-4 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+          />
+        </div>
+      <div>
+        <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+            Shop Name
+          </label>
+          <select
+            value={singleValue}
+            onChange={(e) => setSingleValue(e.target.value)}
+            className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          >
+            <option value="">Select option</option>
+            <option value="option1">Option 1</option>
+            <option value="option2">Option 2</option>
+            <option value="option3">Option 3</option>
+          </select>
+        </div>
+       <div>
+          <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+            Food Category
+          </label>
+          <select
+            value={singleValue}
+            onChange={(e) => setSingleValue(e.target.value)}
+            className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+          >
+            <option value="">Select option</option>
+            <option value="option1">Option 1</option>
+            <option value="option2">Option 2</option>
+            <option value="option3">Option 3</option>
+          </select>
+        </div>
+    </div>
         <Table>
           {/* Table Header */}
           <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
