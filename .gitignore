@@ -139,3 +139,35 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+
+##########################################
+# .NET & C# Ignore Section
+##########################################
+
+# Build results
+bin/
+obj/
+publish/
+
+# Rider / VS / VS Code folders
+.vs/
+.vscode/
+.idea/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# EF Core
+**/Migrations/**/Snapshot.cs
+
+# Logs
+*.log

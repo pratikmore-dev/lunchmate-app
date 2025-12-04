@@ -7,6 +7,13 @@ import {
 } from "../../components/ui/table";
 import { useEffect, useRef, useState } from "react";
 import MultiSelect from "../../../src/components/form/MultiSelect";
+import { useModal } from "../../hooks/useModal";
+import { Modal } from "../../components/ui/modal";
+import Label from "../../components/form/Label";
+import Input from "../../components/form/input/InputField";
+import Button from "../../components/ui/button/Button";
+// import { ShoppingCart } from "lucide-react";
+
 
 
 interface MenuItem {
@@ -113,6 +120,12 @@ export default function MenuTable() {
     },
   ]);
 
+  const totalBill = tableData.reduce((sum, item) => sum + item.total, 0);
+const employeeCut = totalBill / 2;
+const companyCut = Math.min(totalBill / 2, 75);
+const cash = totalBill > 150 ? totalBill - 150 : 0;
+
+
   // Function to handle quantity change
   const handleQuantityChange = (id: number, change: number) => {
     setTableData((prevData) =>
@@ -129,9 +142,9 @@ export default function MenuTable() {
       })
     );
   };
-
+  const { isOpen, openModal, closeModal } = useModal();
     // const [selectedValues, setSelectedValues] = useState<string[]>([]);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const multiOptions = [
     { value: "1", text: "Option 1", selected: false },
     { value: "2", text: "Option 2", selected: false },
@@ -167,14 +180,7 @@ const [singleValue, setSingleValue] = useState<string>("");
         
             {/* Dropdowns Section */}
     <div className="grid grid-cols-3 gap-4 p-4">
-      {/* <div>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Search or type command..."
-                  className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-gray-900 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[330px]"
-                />
-      </div> */}
+      
        <div>
           <label className="mb-3 block text-sm font-medium text-black dark:text-white">
             Search
@@ -318,6 +324,240 @@ const [singleValue, setSingleValue] = useState<string>("");
 </TableBody>
         </Table>
       </div>
+
+      {/* Floating Button */}
+{/* <div className="fixed bottom-8 right-8 z-50">
+  <div className="group relative">
+    <div className="absolute bottom-full right-0 mb-2 hidden whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-sm text-white shadow-lg group-hover:block dark:bg-gray-700">
+      Place Order
+      <div className="absolute -bottom-1 right-4 h-2 w-2 rotate-45 bg-gray-900 dark:bg-gray-700"></div>
+    </div>
+    
+      <button
+      onClick={openModal}
+      className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg transition-all hover:bg-brand-700 hover:shadow-xl active:scale-95"
+    >
+    </button>
+  </div>
+</div> */}
+
+
+<div className="fixed bottom-8 right-8 z-50">
+  <div className="group relative">
+    <div className="absolute bottom-full right-0 mb-2 hidden whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-sm text-white shadow-lg group-hover:block dark:bg-gray-700">
+      Place Order
+      <div className="absolute -bottom-1 right-4 h-2 w-2 rotate-45 bg-gray-900 dark:bg-gray-700"></div>
+    </div>
+
+   
+    
+      <button
+      onClick={openModal}
+      className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg transition-all hover:bg-brand-700 hover:shadow-xl active:scale-95"
+    >
+
+       <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M4.98481 2.44399C3.11333 1.57147 1.15325 3.46979 1.96543 5.36824L3.82086 9.70527C3.90146 9.89367 3.90146 10.1069 3.82086 10.2953L1.96543 14.6323C1.15326 16.5307 3.11332 18.4291 4.98481 17.5565L16.8184 12.0395C18.5508 11.2319 18.5508 8.76865 16.8184 7.961L4.98481 2.44399ZM3.34453 4.77824C3.0738 4.14543 3.72716 3.51266 4.35099 3.80349L16.1846 9.32051C16.762 9.58973 16.762 10.4108 16.1846 10.68L4.35098 16.197C3.72716 16.4879 3.0738 15.8551 3.34453 15.2223L5.19996 10.8853C5.21944 10.8397 5.23735 10.7937 5.2537 10.7473L9.11784 10.7473C9.53206 10.7473 9.86784 10.4115 9.86784 9.99726C9.86784 9.58304 9.53206 9.24726 9.11784 9.24726L5.25157 9.24726C5.2358 9.20287 5.2186 9.15885 5.19996 9.11528L3.34453 4.77824Z"
+      fill="currentColor"
+    />
+  </svg>
+    </button>
+  </div>
+</div>
+
+{/* <button
+  onClick={openModal}
+  className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg transition-all hover:bg-brand-700 hover:shadow-xl active:scale-95"
+>
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M4.98481 2.44399C3.11333 1.57147 1.15325 3.46979 1.96543 5.36824L3.82086 9.70527C3.90146 9.89367 3.90146 10.1069 3.82086 10.2953L1.96543 14.6323C1.15326 16.5307 3.11332 18.4291 4.98481 17.5565L16.8184 12.0395C18.5508 11.2319 18.5508 8.76865 16.8184 7.961L4.98481 2.44399ZM3.34453 4.77824C3.0738 4.14543 3.72716 3.51266 4.35099 3.80349L16.1846 9.32051C16.762 9.58973 16.762 10.4108 16.1846 10.68L4.35098 16.197C3.72716 16.4879 3.0738 15.8551 3.34453 15.2223L5.19996 10.8853C5.21944 10.8397 5.23735 10.7937 5.2537 10.7473L9.11784 10.7473C9.53206 10.7473 9.86784 10.4115 9.86784 9.99726C9.86784 9.58304 9.53206 9.24726 9.11784 9.24726L5.25157 9.24726C5.2358 9.20287 5.2186 9.15885 5.19996 9.11528L3.34453 4.77824Z"
+      fill="currentColor"
+    />
+  </svg>
+</button> */}
+
+
+
+{/* Modal */}
+{/* <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[450px] m-4">
+  <div className="no-scrollbar relative w-full max-w-[450px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+    <div className="px-2 pr-14">
+      <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
+        Place Order
+      </h4>
+    </div>
+    <form className="flex flex-col">
+      <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
+        <div>
+          <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
+            Food Category Details
+          </h5>
+
+          <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+            <div>
+              <Label>Category Name</Label>
+              <Input type="text" placeholder="Enter category name" />
+            </div>
+
+          </div>
+        </div>
+        <div className="mt-7">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+            <div className="col-span-2 lg:col-span-1">
+              <Label>Status</Label>
+              <div className="flex gap-6 mt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="active"
+                    defaultChecked
+                    className="w-4 h-4 text-green-600 focus:ring-green-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Active
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="inactive"
+                    className="w-4 h-4 text-red-600 focus:ring-red-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Inactive
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+        <Button size="sm" variant="outline" onClick={closeModal}>
+          Close
+        </Button>
+        <Button size="sm" >
+          Save Changes
+        </Button>
+      </div>
+    </form>
+  </div>
+</Modal> */}
+
+<Modal isOpen={isOpen} onClose={closeModal} className="max-w-[450px] m-4">
+  <div className="no-scrollbar relative w-full max-w-[450px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+    <div className="px-2 pr-14">
+      <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
+        Place Order
+      </h4>
+    </div>
+    
+    <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
+    {/* order details */}
+      <div className="mb-6">
+        <h5 className="mb-4 text-lg font-medium text-gray-800 dark:text-white/90">
+          Order Details
+        </h5>
+        
+        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+          <table className="w-full">
+            <thead className="bg-gray-50 dark:bg-gray-800">
+              <tr>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Sr No</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Vendor</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Item</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Quantity</th>
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Total</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {tableData
+                .filter((item) => item.quantity > 0)
+                .map((item, index) => (
+                  <tr key={item.id}>
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">{index + 1}</td>
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">Vendor {index + 1}</td>
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">{item.food.name}</td>
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">{item.quantity}</td>
+                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">${item.total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              {tableData.filter(item => item.quantity > 0).length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                    No items added to cart yet
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    {/* billing section */}
+      <div className="mb-6">
+        <h5 className="mb-4 text-lg font-medium text-gray-800 dark:text-white/90">
+          Billing
+        </h5>
+        
+        <div className="space-y-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-700 dark:text-gray-300">Total :</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">${totalBill.toFixed(2)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-700 dark:text-gray-300">Cash:</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">${cash.toFixed(2)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-700 dark:text-gray-300">Emp Cut:</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">${employeeCut.toFixed(2)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-700 dark:text-gray-300">Company Cut:</span>
+            <span className="text-sm font-medium text-gray-900 dark:text-white">${companyCut.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+      <Button size="sm" variant="outline" onClick={closeModal}>
+        Cancel Order
+      </Button>
+      <Button 
+        size="sm" 
+        onClick={() => {
+          alert("Order placed successfully!");
+          closeModal();
+        }}
+        disabled={tableData.filter(item => item.quantity > 0).length === 0}
+      >
+        Place Order
+      </Button>
+    </div>
+  </div>
+</Modal>
     </div>
   );
 }
