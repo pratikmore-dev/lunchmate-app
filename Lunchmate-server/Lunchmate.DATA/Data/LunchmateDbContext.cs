@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Lunchmate.CORE.Entities;
+using Lunchmate.DATA;
 
 namespace Lunchmate.DATA
 {
@@ -9,6 +9,6 @@ namespace Lunchmate.DATA
         {
         }
 
-        public DbSet<Employee> Employees { get; set; }
+        // public DbSet<Employee> Employees { get; set; }
     }
 }
