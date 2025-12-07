@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lunchmate.Data.Dtos
+namespace Lunchmate.DATA.Dtos
 {
     public class Result<T>
     {

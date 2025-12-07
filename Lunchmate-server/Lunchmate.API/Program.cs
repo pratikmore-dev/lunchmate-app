@@ -1,5 +1,12 @@
 using Lunchmate.DATA.Data;
 using Microsoft.EntityFrameworkCore;
+using Lunchmate.Core.Services;
+using Lunchmate.DATA.Repositories;
+using Lunchmate.API.Controllers;
+using Lunchmate.DATA.Models;
+using AutoMapper;
+using Lunchmate.Core.Mappers;
+
 
 
 
@@ -9,6 +16,33 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 // builder.Services.AddOpenApi();
+
+
+
+// Register all services & repositories using Scrutor
+builder.Services.Scan(scan => scan
+    .FromAssemblies(
+        typeof(FoodCategoryService).Assembly,
+        typeof(FoodCategoryRepository).Assembly
+    )
+    .AddClasses(c => c.Where(t => t.Name.EndsWith("Service") || t.Name.EndsWith("Repository")))
+    .AsImplementedInterfaces()
+    .WithScopedLifetime()
+);
+
+
+builder.Services.AddScoped(typeof(ICrudService<>), typeof(CrudService<>));
+
+// AutoMapper
+//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+var config = new MapperConfiguration(cfg =>
+{
+    cfg.AddProfile(new MappingProfile());
+});
+
+IMapper mapper = config.CreateMapper();
+
+builder.Services.AddSingleton(mapper);
 
 //dbcontext
 builder.Services.AddDbContext<LunchmateDbContext>(options =>
