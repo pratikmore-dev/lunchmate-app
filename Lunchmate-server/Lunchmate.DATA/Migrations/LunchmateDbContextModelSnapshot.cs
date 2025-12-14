@@ -24,11 +24,9 @@ namespace Lunchmate.DATA.Migrations
 
             modelBuilder.Entity("Lunchmate.DATA.Models.FoodCategory", b =>
                 {
-                    b.Property<int>("FoodCategoryID")
+                    b.Property<Guid>("FoodCategoryID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FoodCategoryID"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()

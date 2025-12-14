@@ -12,7 +12,7 @@ namespace Lunchmate.DATA.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int FoodCategoryID { get; set; }
+        public Guid FoodCategoryID { get; set; }
 
         [Required]
         [MaxLength(100)]

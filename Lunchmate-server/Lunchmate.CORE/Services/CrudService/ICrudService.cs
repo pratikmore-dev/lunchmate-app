@@ -12,8 +12,8 @@ namespace Lunchmate.Core.Services
     {
         Task<TEntity> GetById(Guid Id);
         IEnumerable<TEntity> GetAll();
-        Task<Result<TCreateResponse>> Create<TCreateRequest, TCreateResponse>(TCreateRequest input);
-        Task<Result<TUpdateResponse>> Update<TUpdateRequest, TUpdateResponse>(TUpdateRequest input, string id);
+        Task<Result<TCreateResponse>> Create<TCreateRequest, TCreateResponse>(TCreateRequest input, string userId);
+        Task<Result<TUpdateResponse>> Update<TUpdateRequest, TUpdateResponse>(TUpdateRequest input, string id, string userId);
         Task<Result<bool>> Delete(Guid Id);
     }
 }

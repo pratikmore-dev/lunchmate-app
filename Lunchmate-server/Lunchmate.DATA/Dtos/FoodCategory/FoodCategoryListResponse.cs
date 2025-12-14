@@ -10,7 +10,7 @@ namespace Lunchmate.DATA.Dtos
 {
     public class FoodCategoryListResponse
     {
-        public int FoodCategoryID { get; set; }
+        public Guid FoodCategoryID { get; set; }
         [MaxLength(100)]
         public string FoodCategoryName { get; set; }
 

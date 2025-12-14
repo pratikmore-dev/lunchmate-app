@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Lunchmate.DATA.Migrations
 {
     [DbContext(typeof(LunchmateDbContext))]
-    [Migration("20251206131634_InitialCreate_FoodCategory")]
-    partial class InitialCreate_FoodCategory
+    [Migration("20251209165049_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,11 +27,9 @@ namespace Lunchmate.DATA.Migrations
 
             modelBuilder.Entity("Lunchmate.DATA.Models.FoodCategory", b =>
                 {
-                    b.Property<int>("FoodCategoryID")
+                    b.Property<Guid>("FoodCategoryID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FoodCategoryID"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CreatedBy")
                         .IsRequired()

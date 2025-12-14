@@ -19,6 +19,7 @@ namespace Lunchmate.API.Controllers
             this._crudService = crudService;
         }
 
+        string SystemUserId = "System";
         //[Authorize]
         [AllowAnonymous]
         [HttpGet]
@@ -54,7 +55,7 @@ namespace Lunchmate.API.Controllers
                 }
                 else
                 {
-                    return GenerateCrudResponse<TCreateResponse>(await _crudService.Create<TCreateRequest, TCreateResponse>(product, LoggedInUser.UserID));
+                    return GenerateCrudResponse<TCreateResponse>(await _crudService.Create<TCreateRequest, TCreateResponse>(product, SystemUserId));
                 }
             }
             catch (Exception ex)
@@ -72,7 +73,7 @@ namespace Lunchmate.API.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    return GenerateCrudResponse(await _crudService.Update<TUpdateRequest, TUpdateResponse>(product, id, LoggedInUser.UserID));
+                    return GenerateCrudResponse(await _crudService.Update<TUpdateRequest, TUpdateResponse>(product, id, SystemUserId));
                 }
                 else
                 {
