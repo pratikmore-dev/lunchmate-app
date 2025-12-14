@@ -1,3 +1,4 @@
+using System.Text;
 using Lunchmate.DATA.Data;
 using Microsoft.EntityFrameworkCore;
 using Lunchmate.Core.Services;
@@ -6,6 +7,9 @@ using Lunchmate.API.Controllers;
 using Lunchmate.DATA.Models;
 using AutoMapper;
 using Lunchmate.Core.Mappers;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+// using Microsoft.OpenApi.Models;
 
 
 
@@ -17,6 +21,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 // builder.Services.AddOpenApi();
 
+builder.Services.AddIdentity<User, Role>()
+    .AddEntityFrameworkStores<LunchmateDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 
 
 // Register all services & repositories using Scrutor
