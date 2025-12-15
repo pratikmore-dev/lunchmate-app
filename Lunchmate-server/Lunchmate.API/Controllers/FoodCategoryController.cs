@@ -3,8 +3,6 @@ using System.Security.Cryptography.X509Certificates;
 using Lunchmate.Core.Services;
 using Lunchmate.DATA.Dtos;
 using Lunchmate.DATA.Models;
-
-
 using Microsoft.AspNetCore.Mvc;
 
 
