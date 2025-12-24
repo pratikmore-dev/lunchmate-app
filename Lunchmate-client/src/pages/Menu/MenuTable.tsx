@@ -5,19 +5,19 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import MultiSelect from "../../../src/components/form/MultiSelect";
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
-// import { ShoppingCart } from "lucide-react";
+import { getMenu } from "../../service/menu.service";
 
 
 
 interface MenuItem {
-  id: number;
+  id: string;
   food: {
     image: string;
     name: string;
@@ -29,119 +29,55 @@ interface MenuItem {
 }
 
 export default function MenuTable() {
-  const [tableData, setTableData] = useState<MenuItem[]>([
-    {
-      id: 1,
-      food: {
-        image: "/images/food/pizza.jpg",
-        name: "Margherita Pizza",
-        type: "Main Course",
-      },
-      quantity: 0,
-      rate: 12.99,
-      total: 0,
-    },
-    {
-      id: 2,
-      food: {
-        image: "/images/food/burger.jpg",
-        name: "Cheese Burger",
-        type: "Fast Food",
-      },
-      quantity: 0,
-      rate: 8.99,
-      total: 0,
-    },
-    {
-      id: 3,
-      food: {
-        image: "/images/food/pasta.jpg",
-        name: "Alfredo Pasta",
-        type: "Main Course",
-      },
-      quantity: 0,
-      rate: 14.50,
-      total: 0,
-    },
-    {
-      id: 4,
-      food: {
-        image: "/images/food/coffee.jpg",
-        name: "Cappuccino",
-        type: "Beverage",
-      },
-      quantity: 0,
-      rate: 4.99,
-      total: 0,
-    },
-    {
-      id: 5,
-      food: {
-        image: "/images/food/salad.jpg",
-        name: "Caesar Salad",
-        type: "Appetizer",
-      },
-      quantity: 0,
-      rate: 9.99,
-      total: 0,
-    },
-    {
-      id: 6,
-      food: {
-        image: "/images/food/cake.jpg",
-        name: "Chocolate Cake",
-        type: "Dessert",
-      },
-      quantity: 0,
-      rate: 6.99,
-      total: 0,
-    },
-    {
-      id: 7,
-      food: {
-        image: "/images/food/steak.jpg",
-        name: "Grilled Steak",
-        type: "Main Course",
-      },
-      quantity: 0,
-      rate: 24.99,
-      total: 0,
-    },
-    {
-      id: 8,
-      food: {
-        image: "/images/food/juice.jpg",
-        name: "Orange Juice",
-        type: "Beverage",
-      },
-      quantity: 0,
-      rate: 3.99,
-      total: 0,
-    },
-  ]);
+ const [menu, setMenu] = useState<MenuItem[]>([]);
 
-  const totalBill = tableData.reduce((sum, item) => sum + item.total, 0);
+useEffect(() => {
+  getMenu()
+    .then((res) => {
+      const mappedMenu: MenuItem[] = res.data.map((item) => ({
+        id: item.menuID,
+        food: {
+          image: "",            // not in API → empty
+          name: item.menuName,  // from API
+          type: "",             // not in API → empty
+        },
+        quantity: 0,            // UI-only
+        rate: 0,                // API does not provide price
+        total: 0,               // derived later
+      }));
+
+      setMenu(mappedMenu);
+    })
+    .catch(console.error);
+}, []);
+
+
+// const totalBill = menu.reduce((sum, item) => sum + item.total, 0);
+const totalBill = useMemo(
+  () => menu.reduce((sum, item) => sum + item.total, 0),
+  [menu]
+);
 const employeeCut = totalBill / 2;
 const companyCut = Math.min(totalBill / 2, 75);
 const cash = totalBill > 150 ? totalBill - 150 : 0;
 
 
   // Function to handle quantity change
-  const handleQuantityChange = (id: number, change: number) => {
-    setTableData((prevData) =>
-      prevData.map((item) => {
-        if (item.id === id) {
-          const newQuantity = Math.max(0, item.quantity + change);
-          return {
-            ...item,
-            quantity: newQuantity,
-            total: newQuantity * item.rate,
-          };
-        }
-        return item;
-      })
-    );
-  };
+const handleQuantityChange = (id: string, change: number) => {  // Changed from 'number' to 'string'
+  setMenu((prevData) =>
+    prevData.map((item) => {
+      if (item.id === id) {
+        const newQuantity = Math.max(0, item.quantity + change);
+        return {
+          ...item,
+          quantity: newQuantity,
+          total: newQuantity * item.rate,
+        };
+      }
+      return item;
+    })
+  );
+};
   const { isOpen, openModal, closeModal } = useModal();
     // const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -256,7 +192,7 @@ const [singleValue, setSingleValue] = useState<string>("");
 
           {/* Table Body */}
           <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-  {tableData.map((menuItem) => (
+  {menu.map((menuItem) => (
     <TableRow key={menuItem.id}>
       {/* Column 1: Item Name */}
       <TableCell className="px-5 py-4 sm:px-6 text-start">
@@ -325,23 +261,6 @@ const [singleValue, setSingleValue] = useState<string>("");
         </Table>
       </div>
 
-      {/* Floating Button */}
-{/* <div className="fixed bottom-8 right-8 z-50">
-  <div className="group relative">
-    <div className="absolute bottom-full right-0 mb-2 hidden whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-sm text-white shadow-lg group-hover:block dark:bg-gray-700">
-      Place Order
-      <div className="absolute -bottom-1 right-4 h-2 w-2 rotate-45 bg-gray-900 dark:bg-gray-700"></div>
-    </div>
-    
-      <button
-      onClick={openModal}
-      className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg transition-all hover:bg-brand-700 hover:shadow-xl active:scale-95"
-    >
-    </button>
-  </div>
-</div> */}
-
-
 <div className="fixed bottom-8 right-8 z-50">
   <div className="group relative">
     <div className="absolute bottom-full right-0 mb-2 hidden whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-sm text-white shadow-lg group-hover:block dark:bg-gray-700">
@@ -374,96 +293,6 @@ const [singleValue, setSingleValue] = useState<string>("");
   </div>
 </div>
 
-{/* <button
-  onClick={openModal}
-  className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg transition-all hover:bg-brand-700 hover:shadow-xl active:scale-95"
->
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M4.98481 2.44399C3.11333 1.57147 1.15325 3.46979 1.96543 5.36824L3.82086 9.70527C3.90146 9.89367 3.90146 10.1069 3.82086 10.2953L1.96543 14.6323C1.15326 16.5307 3.11332 18.4291 4.98481 17.5565L16.8184 12.0395C18.5508 11.2319 18.5508 8.76865 16.8184 7.961L4.98481 2.44399ZM3.34453 4.77824C3.0738 4.14543 3.72716 3.51266 4.35099 3.80349L16.1846 9.32051C16.762 9.58973 16.762 10.4108 16.1846 10.68L4.35098 16.197C3.72716 16.4879 3.0738 15.8551 3.34453 15.2223L5.19996 10.8853C5.21944 10.8397 5.23735 10.7937 5.2537 10.7473L9.11784 10.7473C9.53206 10.7473 9.86784 10.4115 9.86784 9.99726C9.86784 9.58304 9.53206 9.24726 9.11784 9.24726L5.25157 9.24726C5.2358 9.20287 5.2186 9.15885 5.19996 9.11528L3.34453 4.77824Z"
-      fill="currentColor"
-    />
-  </svg>
-</button> */}
-
-
-
-{/* Modal */}
-{/* <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[450px] m-4">
-  <div className="no-scrollbar relative w-full max-w-[450px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
-    <div className="px-2 pr-14">
-      <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-        Place Order
-      </h4>
-    </div>
-    <form className="flex flex-col">
-      <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
-        <div>
-          <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
-            Food Category Details
-          </h5>
-
-          <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-            <div>
-              <Label>Category Name</Label>
-              <Input type="text" placeholder="Enter category name" />
-            </div>
-
-          </div>
-        </div>
-        <div className="mt-7">
-          <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-            <div className="col-span-2 lg:col-span-1">
-              <Label>Status</Label>
-              <div className="flex gap-6 mt-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="status"
-                    value="active"
-                    defaultChecked
-                    className="w-4 h-4 text-green-600 focus:ring-green-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Active
-                  </span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="status"
-                    value="inactive"
-                    className="w-4 h-4 text-red-600 focus:ring-red-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Inactive
-                  </span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-        <Button size="sm" variant="outline" onClick={closeModal}>
-          Close
-        </Button>
-        <Button size="sm" >
-          Save Changes
-        </Button>
-      </div>
-    </form>
-  </div>
-</Modal> */}
-
 <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[450px] m-4">
   <div className="no-scrollbar relative w-full max-w-[450px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
     <div className="px-2 pr-14">
@@ -491,7 +320,7 @@ const [singleValue, setSingleValue] = useState<string>("");
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {tableData
+              {menu
                 .filter((item) => item.quantity > 0)
                 .map((item, index) => (
                   <tr key={item.id}>
@@ -502,7 +331,7 @@ const [singleValue, setSingleValue] = useState<string>("");
                     <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">${item.total.toFixed(2)}</td>
                   </tr>
                 ))}
-              {tableData.filter(item => item.quantity > 0).length === 0 && (
+              {menu.filter(item => item.quantity > 0).length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                     No items added to cart yet
@@ -551,7 +380,7 @@ const [singleValue, setSingleValue] = useState<string>("");
           alert("Order placed successfully!");
           closeModal();
         }}
-        disabled={tableData.filter(item => item.quantity > 0).length === 0}
+        disabled={menu.filter(item => item.quantity > 0).length === 0}
       >
         Place Order
       </Button>
