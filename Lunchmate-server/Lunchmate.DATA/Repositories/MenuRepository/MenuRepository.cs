@@ -29,6 +29,13 @@ namespace Lunchmate.DATA.Repositories
         //         .Where(c => !excludeId.HasValue || c.SoftwareTypeId != excludeId.Value)
         //         .AnyAsync();
         // }
+
+           
+    public new IQueryable<Menu> GetAll()
+    {
+        return _context.Menu
+            .Include(m => m.FoodCategory);  
+    }
        
     }
 

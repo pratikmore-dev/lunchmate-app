@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-
 namespace Lunchmate.DATA.Dtos
 {
     public class FoodMenuResponse
@@ -24,5 +23,7 @@ namespace Lunchmate.DATA.Dtos
 
         [Required]
         public bool IsHalfAvailable { get; set; } 
+
+        public FoodCategoryListResponse? FoodCategory { get; set; }
     }
 }

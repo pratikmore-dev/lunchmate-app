@@ -10,6 +10,6 @@ namespace Lunchmate.DATA.Repositories
     public interface IMenuRepository : IRepository<Menu>
     {
         // Task<bool> IsDuplicateAsync(string FoodCategoryName, Guid? excludeId = null);
-
+        IQueryable<Menu> GetAll();
     }
 }

@@ -13,7 +13,8 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
 import { getMenu } from "../../service/menu.service";
-
+import { getFoodCategory,FoodCategory } from "../../service/foodCategory.service";
+import { getVendor, Vendor } from "../../service/vendor.service";
 
 
 interface MenuItem {
@@ -30,8 +31,16 @@ interface MenuItem {
 
 export default function MenuTable() {
  const [menu, setMenu] = useState<MenuItem[]>([]);
-
+ const[foodCategory,setFoodCategory] = useState<FoodCategory[]>([]);
+ const[vendor, setVendor] = useState<Vendor[]>([]);
 useEffect(() => {
+  getVendor().then((res)=>{
+    setVendor(res.data)
+  })
+  getFoodCategory().then((res)=>{
+    setFoodCategory(res.data)
+  })
+  .catch(console.error)
   getMenu()
     .then((res) => {
       const mappedMenu: MenuItem[] = res.data.map((item) => ({
@@ -50,6 +59,8 @@ useEffect(() => {
     })
     .catch(console.error);
 }, []);
+
+
 
 
 // const totalBill = menu.reduce((sum, item) => sum + item.total, 0);
@@ -138,9 +149,11 @@ const [singleValue, setSingleValue] = useState<string>("");
             className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           >
             <option value="">Select option</option>
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <option value="option3">Option 3</option>
+            {
+              vendor.map(ven=>(
+                <option key={(ven.vendorID)} value={(ven.vendorName)}>{ven.vendorName}</option>
+              ))
+            }
           </select>
         </div>
        <div>
@@ -153,9 +166,11 @@ const [singleValue, setSingleValue] = useState<string>("");
             className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           >
             <option value="">Select option</option>
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <option value="option3">Option 3</option>
+            {
+              foodCategory.map(cat =>(
+                <option key={cat.foodCategoryID} value={cat.foodCategoryName}>{cat.foodCategoryName}</option>
+              ))
+            }
           </select>
         </div>
     </div>
