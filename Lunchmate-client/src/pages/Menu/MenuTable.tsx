@@ -15,24 +15,35 @@ import Button from "../../components/ui/button/Button";
 import { getMenu } from "../../service/menu.service";
 import { getFoodCategory,FoodCategory } from "../../service/foodCategory.service";
 import { getVendor, Vendor } from "../../service/vendor.service";
+import { getVendorMenu } from "../../service/vendorMenu.service";
 
-
-interface MenuItem {
-  id: string;
-  food: {
-    image: string;
-    name: string;
-    type: string;
-  };
+interface VendorMenuItem {
+  vendorMenuID: string;
+  menuID: string;
+  menuName: string;
+  fullRate: number;
+  halfRate: number;
+  isAvailable: boolean;
+  vendorSpecificNotes: string;
+  // Add client-side state for cart management
   quantity: number;
-  rate: number;
-  total: number;
+  selectedRate: 'full' | 'half';
+}
+
+interface Menu{
+  menuID:string;
+  menuName:string;
+  fullRate:number;
+  halfRate:number;
+  isHalfAvilable:boolean;
+  vendorSpecificNotice:string;
 }
 
 export default function MenuTable() {
- const [menu, setMenu] = useState<MenuItem[]>([]);
+const [vendorMenuItems, setVendorMenuItems] = useState<VendorMenuItem[]>([]);
  const[foodCategory,setFoodCategory] = useState<FoodCategory[]>([]);
  const[vendor, setVendor] = useState<Vendor[]>([]);
+ const [vendorID, setVendorID] = useState("");
 useEffect(() => {
   getVendor().then((res)=>{
     setVendor(res.data)
@@ -41,64 +52,85 @@ useEffect(() => {
     setFoodCategory(res.data)
   })
   .catch(console.error)
-  getMenu()
-    .then((res) => {
-      const mappedMenu: MenuItem[] = res.data.map((item) => ({
-        id: item.menuID,
-        food: {
-          image: "",            // not in API → empty
-          name: item.menuName,  // from API
-          type: "",             // not in API → empty
-        },
-        quantity: 0,            // UI-only
-        rate: 0,                // API does not provide price
-        total: 0,               // derived later
-      }));
 
-      setMenu(mappedMenu);
-    })
-    .catch(console.error);
 }, []);
 
 
+useEffect(()=>{
+  
+  console.log("vendor dropdown triggered");
+    if (!vendorID) {
+    setVendorMenuItems([]); // Clear menu when no vendor selected
+    return;
+  }
+  getVendorMenu(vendorID)
+    .then((res) => {
+      // Transform API data to include UI state
+      const itemsWithDefaults = res.data.map((item: VendorMenuItem) => ({
+        ...item,
+        quantity: 0, // Initialize quantity
+        selectedRate: 'full' as const, // Default to full rate
+      }));
+      setVendorMenuItems(itemsWithDefaults);
+    })
+    .catch((error) => {
+      console.error('Failed to fetch vendor menu:', error);
+      setVendorMenuItems([]); // Clear on error
+    });
+}, [vendorID]);
 
 
-// const totalBill = menu.reduce((sum, item) => sum + item.total, 0);
-const totalBill = useMemo(
-  () => menu.reduce((sum, item) => sum + item.total, 0),
-  [menu]
+
+// Remove old calculations and replace with:
+const cartItems = useMemo(
+  () => vendorMenuItems.filter((item) => item.quantity > 0),
+  [vendorMenuItems]
 );
-const employeeCut = totalBill / 2;
-const companyCut = Math.min(totalBill / 2, 75);
-const cash = totalBill > 150 ? totalBill - 150 : 0;
+
+const totalBill = useMemo(() => {
+  return vendorMenuItems.reduce((sum, item) => {
+    if (item.quantity === 0) return sum;
+    
+    const rate = item.selectedRate === 'full' ? item.fullRate : item.halfRate;
+    return sum + (rate * item.quantity);
+  }, 0);
+}, [vendorMenuItems]);
+
+const employeeCut = useMemo(() => totalBill / 2, [totalBill]);
+
+const companyCut = useMemo(() => Math.min(totalBill / 2, 75), [totalBill]);
+
+const cash = useMemo(() => (totalBill > 150 ? totalBill - 150 : 0), [totalBill]);
 
 
-  // Function to handle quantity change
-const handleQuantityChange = (id: string, change: number) => {  // Changed from 'number' to 'string'
-  setMenu((prevData) =>
-    prevData.map((item) => {
-      if (item.id === id) {
+// Handler for quantity changes
+const handleQuantityChange = (vendorMenuID: string, change: number) => {
+  setVendorMenuItems((prevItems) =>
+    prevItems.map((item) => {
+      if (item.vendorMenuID === vendorMenuID) {
         const newQuantity = Math.max(0, item.quantity + change);
         return {
           ...item,
           quantity: newQuantity,
-          total: newQuantity * item.rate,
         };
       }
       return item;
     })
   );
 };
+
+// Handler for rate selection (full/half)
+const handleRateSelection = (vendorMenuID: string, rateType: 'full' | 'half') => {
+  setVendorMenuItems((prevItems) =>
+    prevItems.map((item) =>
+      item.vendorMenuID === vendorMenuID
+        ? { ...item, selectedRate: rateType }
+        : item
+    )
+  );
+};
   const { isOpen, openModal, closeModal } = useModal();
-    // const [selectedValues, setSelectedValues] = useState<string[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const multiOptions = [
-    { value: "1", text: "Option 1", selected: false },
-    { value: "2", text: "Option 2", selected: false },
-    { value: "3", text: "Option 3", selected: false },
-    { value: "4", text: "Option 4", selected: false },
-    { value: "5", text: "Option 5", selected: false },
-  ];
+
 
 const [selectedValues, setSelectedValues] = useState<string[]>(["1", "3"]);
 const inputRef = useRef<HTMLInputElement>(null);
@@ -145,13 +177,13 @@ const [singleValue, setSingleValue] = useState<string>("");
           </label>
           <select
             value={singleValue}
-            onChange={(e) => setSingleValue(e.target.value)}
+            onChange={(e) => setVendorID(e.target.value)}
             className="w-full rounded-lg border border-stroke bg-transparent py-3 pl-4 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
           >
             <option value="">Select option</option>
             {
               vendor.map(ven=>(
-                <option key={(ven.vendorID)} value={(ven.vendorName)}>{ven.vendorName}</option>
+                <option key={(ven.vendorID)}  value={ven.vendorID}>{ven.vendorName}</option>
               ))
             }
           </select>
@@ -182,96 +214,154 @@ const [singleValue, setSingleValue] = useState<string>("");
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Item Name
+                Menu Name
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Quantity
+               Full Rate
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Rate
+               Half Rate
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Total
+                Vendor Notes
               </TableCell>
+               <TableCell
+      isHeader
+      className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+    >
+      Quantity
+    </TableCell>
             </TableRow>
           </TableHeader>
 
           {/* Table Body */}
-          <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-  {menu.map((menuItem) => (
-    <TableRow key={menuItem.id}>
-      {/* Column 1: Item Name */}
-      <TableCell className="px-5 py-4 sm:px-6 text-start">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 overflow-hidden rounded-full">
-            <img
-              width={40}
-              height={40}
-              src={menuItem.food.image}
-              alt={menuItem.food.name}
-            />
-          </div>
-          <div>
-            <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-              {menuItem.food.name}
-            </span>
-            <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-              {menuItem.food.type}
-            </span>
-          </div>
-        </div>
-      </TableCell>
-      
-      {/* Column 2: Quantity */}
-      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-        {/* {menuItem.quantity} */}
-         <div className="flex items-center gap-2">
-                    {/* Minus Button */}
-                    <button
-                      onClick={() => handleQuantityChange(menuItem.id, -0.5)}
-                      className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                    >
-                      -
-                    </button>
-
-                    {/* Quantity Input */}
-                    <input
-                      type="number"
-                      value={menuItem.quantity}
-                      readOnly
-                      className="w-16 rounded-md border border-gray-300 bg-gray-50 px-2 py-1 text-center text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-                    />
-
-                    {/* Plus Button */}
-                    <button
-                      onClick={() => handleQuantityChange(menuItem.id, 0.5)}
-                      className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                    >
-                      +
-                    </button>
-                  </div>
-      </TableCell>
-      
-      {/* Column 3: Rate */}
-      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-        ${menuItem.rate.toFixed(2)}
-      </TableCell>
-      
-      {/* Column 4: Total */}
-      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-        ${menuItem.total.toFixed(2)}
+<TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+  {vendorMenuItems.length === 0 ? (
+    <TableRow>
+      <TableCell  className="px-5 py-8 text-center">
+        <span className="text-gray-500 dark:text-gray-400">
+          {vendorID ? 'No menu items available' : 'Please select a vendor to view menu'}
+        </span>
       </TableCell>
     </TableRow>
-  ))}
+  ) : (
+    vendorMenuItems.map((item) => (
+      <TableRow key={item.vendorMenuID}>
+        {/* Column 1: Menu Name */}
+        <TableCell className="px-5 py-4 text-start">
+          <div className="flex items-center gap-3">
+            <div>
+              <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                {item.menuName}
+              </span>
+              {!item.isAvailable && (
+                <span className="mt-1 inline-block rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                  Unavailable
+                </span>
+              )}
+            </div>
+          </div>
+        </TableCell>
+
+        {/* Column 2: Full Rate */}
+        <TableCell className="px-4 py-3 text-start">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-800 dark:text-white">
+              ${item.fullRate.toFixed(2)}
+            </span>
+            <button
+              onClick={() => handleRateSelection(item.vendorMenuID, 'full')}
+              className={`rounded-md px-2 py-1 text-xs transition-colors ${
+                item.selectedRate === 'full'
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+              }`}
+              disabled={!item.isAvailable}
+            >
+              Full
+            </button>
+          </div>
+        </TableCell>
+
+        {/* Column 3: Half Rate */}
+        <TableCell className="px-4 py-3 text-start">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-800 dark:text-white">
+              ${item.halfRate.toFixed(2)}
+            </span>
+            <button
+              onClick={() => handleRateSelection(item.vendorMenuID, 'half')}
+              className={`rounded-md px-2 py-1 text-xs transition-colors ${
+                item.selectedRate === 'half'
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700'
+              }`}
+              disabled={!item.isAvailable}
+            >
+              Half
+            </button>
+          </div>
+        </TableCell>
+
+        {/* Column 4: Vendor Notes */}
+        <TableCell className="px-4 py-3 text-start">
+          {item.vendorSpecificNotes ? (
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {item.vendorSpecificNotes}
+            </span>
+          ) : (
+            <span className="text-sm italic text-gray-400 dark:text-gray-500">
+              No notes
+            </span>
+          )}
+        </TableCell>
+
+        {/* Column 5: Quantity Controls */}
+        <TableCell className="px-4 py-3 text-start">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleQuantityChange(item.vendorMenuID, -1)}
+              disabled={item.quantity === 0 || !item.isAvailable}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              -
+            </button>
+
+            <input
+              type="number"
+              value={item.quantity}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 0;
+                if (value >= 0) {
+                  handleQuantityChange(item.vendorMenuID, value - item.quantity);
+                }
+              }}
+              disabled={!item.isAvailable}
+              className="w-16 rounded-md border border-gray-300 bg-gray-50 px-2 py-1 text-center text-sm text-gray-800 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              min="0"
+            />
+
+            <button
+              onClick={() => handleQuantityChange(item.vendorMenuID, 1)}
+              disabled={!item.isAvailable}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-300 bg-white text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              +
+            </button>
+          </div>
+        </TableCell>
+      </TableRow>
+    ))
+  )}
 </TableBody>
         </Table>
       </div>
@@ -328,32 +418,57 @@ const [singleValue, setSingleValue] = useState<string>("");
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Sr No</th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Vendor</th>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Item</th>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Quantity</th>
                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">Total</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {menu
-                .filter((item) => item.quantity > 0)
-                .map((item, index) => (
-                  <tr key={item.id}>
-                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">{index + 1}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">Vendor {index + 1}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">{item.food.name}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">{item.quantity}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">${item.total.toFixed(2)}</td>
-                  </tr>
-                ))}
-              {menu.filter(item => item.quantity > 0).length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                    No items added to cart yet
-                  </td>
-                </tr>
-              )}
-            </tbody>
+           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+        {cartItems.length === 0 ? (
+          <tr>
+            <td colSpan={5} className="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+              No items added to cart yet
+            </td>
+          </tr>
+        ) : (
+          cartItems.map((item, index) => {
+            const rate = item.selectedRate === 'full' ? item.fullRate : item.halfRate;
+            const itemTotal = rate * item.quantity;
+            
+            return (
+              <tr key={item.vendorMenuID}>
+                <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">
+                  {index + 1}
+                </td>
+                <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">
+                  <div>
+                    <div className="font-medium">{item.menuName}</div>
+                    {item.vendorSpecificNotes && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {item.vendorSpecificNotes}
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">
+                  <div className="flex items-center gap-1">
+                    <span>${rate.toFixed(2)}</span>
+                    <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                      {item.selectedRate}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">
+                  {item.quantity}
+                </td>
+                <td className="px-3 py-2 text-right text-sm font-medium text-gray-900 dark:text-white">
+                  ${itemTotal.toFixed(2)}
+                </td>
+              </tr>
+            );
+          })
+        )}
+      </tbody>
           </table>
         </div>
       </div>
@@ -385,21 +500,50 @@ const [singleValue, setSingleValue] = useState<string>("");
       </div>
     </div>
 
-    <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-      <Button size="sm" variant="outline" onClick={closeModal}>
-        Cancel Order
-      </Button>
-      <Button 
-        size="sm" 
-        onClick={() => {
-          alert("Order placed successfully!");
-          closeModal();
-        }}
-        disabled={menu.filter(item => item.quantity > 0).length === 0}
-      >
-        Place Order
-      </Button>
-    </div>
+   <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+  <Button size="sm" variant="outline" onClick={closeModal}>
+    Cancel Order
+  </Button>
+  <Button 
+    size="sm" 
+    onClick={() => {
+      // TODO: Implement API call to place order
+      // Prepare order data
+      const orderData = {
+        vendorID: vendorID,
+        items: cartItems.map(item => ({
+          vendorMenuID: item.vendorMenuID,
+          menuID: item.menuID,
+          menuName: item.menuName,
+          quantity: item.quantity,
+          selectedRate: item.selectedRate,
+          rate: item.selectedRate === 'full' ? item.fullRate : item.halfRate,
+          total: (item.selectedRate === 'full' ? item.fullRate : item.halfRate) * item.quantity,
+        })),
+        billing: {
+          totalBill: totalBill,
+          cash: cash,
+          employeeCut: employeeCut,
+          companyCut: companyCut,
+        },
+        orderDate: new Date().toISOString(),
+      };
+      
+      console.log('Order to be placed:', orderData);
+      alert("Order placed successfully!");
+      
+      // Reset quantities after successful order
+      setVendorMenuItems(prev => 
+        prev.map(item => ({ ...item, quantity: 0, selectedRate: 'full' as const }))
+      );
+      
+      closeModal();
+    }}
+    disabled={cartItems.length === 0}
+  >
+    Place Order ({cartItems.length} {cartItems.length === 1 ? 'item' : 'items'})
+  </Button>
+</div>
   </div>
 </Modal>
     </div>

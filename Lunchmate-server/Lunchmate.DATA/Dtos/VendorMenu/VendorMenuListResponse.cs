@@ -10,26 +10,13 @@ namespace Lunchmate.DATA.Dtos
 {
     public class VendorMenuListResponse
     {
-        public Guid VendorMenuID { get; set; }
-
-        [Required]
-        public Guid VendorID { get; set; }
-
-        [Required]
-        public Guid MenuID { get; set; }
-
-        [Required]
-        [Column(TypeName = "decimal(10,2)")]
-        public decimal FullRate { get; set; }
-
-        [Column(TypeName = "decimal(10,2)")]
-        public decimal? HalfRate { get; set; }
-
-        [Required]
-        public bool IsAvailable { get; set; } = true;
-
-        [MaxLength(500)]
-        public string? VendorSpecificNotes { get; set; }
+    public Guid VendorMenuID { get; set; }
+    public Guid MenuID { get; set; }
+    public string? MenuName { get; set; }
+    public decimal FullRate { get; set; }
+    public decimal? HalfRate { get; set; }
+    public bool IsAvailable { get; set; }
+    public string? VendorSpecificNotes { get; set; }
 
 
     }

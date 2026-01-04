@@ -4,8 +4,8 @@ using Lunchmate.DATA.Dtos;
 
 namespace Lunchmate.Core.Services
 {
-    public interface IVendorMenuService : ICrudService<VendorMenu>
+    public interface IVendorMenuService 
     {
-        
+        Task<List<VendorMenuListResponse>> GetVendorMenus(Guid vendorId);
     }
 }

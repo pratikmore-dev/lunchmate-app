@@ -13,18 +13,23 @@ using System.Threading.Tasks;
 
 namespace Lunchmate.Core.Services
 {
-    public class VendorMenuService : CrudService<VendorMenu>, IVendorMenuService
+    public class VendorMenuService :  IVendorMenuService
     {
         private readonly IVendorMenuRepository _VendorMenuRepository;
         //private readonly IMapper _mapper;
 
-        public VendorMenuService(IVendorMenuRepository VendorMenuRepository, IMapper mapper) : base(VendorMenuRepository, mapper)
+        public VendorMenuService(IVendorMenuRepository VendorMenuRepository, IMapper mapper) 
         {
             this._VendorMenuRepository = VendorMenuRepository;
         }
         
 
-
+        public async Task<List<VendorMenuListResponse>> GetVendorMenus(Guid vendorId)
+        {
+           
+             var data=await _VendorMenuRepository.GetMenusByVendor(vendorId);
+              return data;
+        }
 
     }
 }

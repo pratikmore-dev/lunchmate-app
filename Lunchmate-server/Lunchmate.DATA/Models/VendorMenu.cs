@@ -50,6 +50,6 @@ namespace Lunchmate.DATA.Models
         public string? LastModifiedBy { get; set; }
         public DateTime? LastModifiedDate { get; set; }
 
-        public bool? IsActive { get; set; }
+        public bool? IsActive { get; set; } = true;
     }
 }

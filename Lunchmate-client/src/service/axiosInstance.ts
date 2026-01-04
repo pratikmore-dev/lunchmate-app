@@ -22,7 +22,11 @@ const axiosInstance = axios.create({
 // );
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  
+    (response) => {
+    console.log("API Response URL:", response.config.url);
+    return response;
+  },
   (error) => {
     return Promise.reject(error);
   }
