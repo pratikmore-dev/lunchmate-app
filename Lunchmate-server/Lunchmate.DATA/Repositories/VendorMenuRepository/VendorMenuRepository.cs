@@ -24,6 +24,7 @@ public async Task<List<VendorMenuListResponse>> GetMenusByVendor(Guid vendorId)
     var query =
         from vm in _context.VendorMenu
         join m in _context.Menu on vm.MenuID equals m.MenuID
+        join v in _context.Vendors on vm.VendorID equals v.VendorID
         where vm.VendorID == vendorId
               && vm.IsAvailable
               && (vm.IsActive == true || vm.IsActive == null)
@@ -31,6 +32,7 @@ public async Task<List<VendorMenuListResponse>> GetMenusByVendor(Guid vendorId)
         {
             VendorMenuID = vm.VendorMenuID,
             MenuID = vm.MenuID,
+            VendorName = v.VendorName,
             MenuName = m.MenuName,
             FullRate = vm.FullRate,
             HalfRate = vm.HalfRate,

@@ -12,6 +12,8 @@ namespace Lunchmate.DATA.Dtos
     {
     public Guid VendorMenuID { get; set; }
     public Guid MenuID { get; set; }
+
+    public string? VendorName { get; set; }
     public string? MenuName { get; set; }
     public decimal FullRate { get; set; }
     public decimal? HalfRate { get; set; }
