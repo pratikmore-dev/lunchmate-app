@@ -12,9 +12,43 @@ namespace Lunchmate.DATA.Repositories
     {
         private readonly LunchmateDbContext _context;
 
-        public OrderRepository(LunchmateDbContext context) : base(context)
+        public OrderRepository(LunchmateDbContext context ) : base(context)
         {
             _context = context;
+        }
+
+         public async Task<Orders> CreateOrderWithItemsAsync(Orders order, List<OrderItems> orderItems)
+        {
+            // Use a transaction to ensure atomicity
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            
+            try
+            {
+                // Add order
+                await _context.Orders.AddAsync(order);
+                await _context.SaveChangesAsync();
+
+                // Set OrderID for all items
+                foreach (var item in orderItems)
+                {
+                    item.OrderID = order.OrderID;
+                }
+
+                // Add all items
+                await _context.OrderItems.AddRangeAsync(orderItems);
+                await _context.SaveChangesAsync();
+
+                // Commit transaction
+                await transaction.CommitAsync();
+
+                return order;
+            }
+            catch (Exception)
+            {
+                // Rollback on error
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         // public async Task<bool> IsDuplicateAsync(string softwareTypeName, Guid? excludeId = null)

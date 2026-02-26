@@ -10,6 +10,8 @@ namespace Lunchmate.DATA.Repositories
     public interface IOrderRepository : IRepository<Orders>
     {
         // Task<bool> IsDuplicateAsync(string OrderName, Guid? excludeId = null);
+        Task<Orders> CreateOrderWithItemsAsync(Orders order, List<OrderItems> orderItems);
+
 
     }
 }

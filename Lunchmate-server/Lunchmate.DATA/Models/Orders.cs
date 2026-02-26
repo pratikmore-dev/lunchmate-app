@@ -11,11 +11,6 @@ namespace Lunchmate.DATA.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid OrderID{get; set;}
 
-        // [Required]
-        // public Guid OrderItemID{get; set;}
-        [Required]
-        public Guid VendorID{get; set;}
-
         [Required]
         public string UserID{get; set;} = string.Empty;
 
@@ -42,10 +37,6 @@ namespace Lunchmate.DATA.Models
         [ForeignKey("UserID")]
         public User? User { get; set; }
 
-        [ForeignKey("VendorID")]
-        public Vendors? Vendor { get; set; }
-
-        public ICollection<OrderItems>? OrderItems { get; set; }
 
         public DateTime CreatedDate {get; set;} = DateTime.Now;
         [StringLength(100)]

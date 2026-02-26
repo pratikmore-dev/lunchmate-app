@@ -27,13 +27,6 @@ namespace Lunchmate.DATA.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // FIX: Disable cascade delete to prevent multiple cascade paths
-            modelBuilder.Entity<Orders>()
-                .HasOne(o => o.Vendor)
-                .WithMany()
-                .HasForeignKey(o => o.VendorID)
-                .OnDelete(DeleteBehavior.Restrict);
-
             modelBuilder.Entity<Orders>()
                 .HasOne(o => o.User)
                 .WithMany()

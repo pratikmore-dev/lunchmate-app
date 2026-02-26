@@ -12,11 +12,12 @@ import { Modal } from "../../components/ui/modal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
-import { getMenu } from "../../service/menu.service";
 import { getFoodCategory,FoodCategory } from "../../service/foodCategory.service";
 import { getVendor, Vendor } from "../../service/vendor.service";
 import { getVendorMenu } from "../../service/vendorMenu.service";
 import { useCart,CartItem } from '../../context/CartContext';
+import { createOrder, CreateOrderRequest } from '../../service/order.service';
+import Swal from 'sweetalert2';
 
 interface VendorMenuItem {
   vendorMenuID: string;
@@ -95,12 +96,12 @@ useEffect(() => {
 
 
 
-// Remove old calculations and replace with:
+//calculations
 const totalBill = useMemo(() => {
   return getCartTotal();
 }, [cartItems]); // Using cartItems from useCart() hook
 
-const employeeCut = useMemo(() => totalBill / 2, [totalBill]);
+const employeeCut = useMemo(() => Math.min(totalBill / 2, 75), [totalBill]);
 
 const companyCut = useMemo(() => Math.min(totalBill / 2, 75), [totalBill]);
 
@@ -537,66 +538,53 @@ const [singleValue, setSingleValue] = useState<string>("");
   </Button>
 <Button 
   size="sm" 
-  onClick={() => {
-    // Prepare order data with multi-vendor support
-    const orderData = {
-      items: cartItems.map(item => ({
-        vendorMenuID: item.vendorMenuID,
-        menuID: item.menuID,
-        menuName: item.menuName,
-        vendorID: item.vendorID,
-        vendorName: item.vendorName,
-        quantity: item.quantity,
-        selectedRate: item.selectedRate,
-        rate: item.selectedRate === 'full' ? item.fullRate : item.halfRate,
-        total: (item.selectedRate === 'full' ? item.fullRate : item.halfRate) * item.quantity,
-        vendorSpecificNotes: item.vendorSpecificNotes,
-      })),
-      billing: {
-        totalBill: totalBill,
-        cash: cash,
+  onClick={async () => {
+    try {
+      // Prepare order data matching backend DTO
+      const orderRequest: CreateOrderRequest = {
+        orderDate: new Date().toISOString(),
+        totalAmount: totalBill,
         employeeCut: employeeCut,
         companyCut: companyCut,
-      },
-      orderDate: new Date().toISOString(),
-      // Group by vendor for easier backend processing
-      vendorGroups: cartItems.reduce((acc, item) => {
-        if (!acc[item.vendorID]) {
-          acc[item.vendorID] = {
-            vendorID: item.vendorID,
-            vendorName: item.vendorName,
-            items: [],
-            vendorTotal: 0,
-          };
-        }
-        const rate = item.selectedRate === 'full' ? item.fullRate : item.halfRate;
-        const itemTotal = rate * item.quantity;
-        
-        acc[item.vendorID].items.push({
+        cashPaid: cash,
+        items: cartItems.map(item => ({
           vendorMenuID: item.vendorMenuID,
-          menuID: item.menuID,
-          menuName: item.menuName,
           quantity: item.quantity,
-          rate: rate,
-          selectedRate: item.selectedRate,
-          total: itemTotal,
+          isHalfPortion: item.selectedRate === 'half',
+          itemRate: item.selectedRate === 'full' ? item.fullRate : item.halfRate,
+          subtotal: (item.selectedRate === 'full' ? item.fullRate : item.halfRate) * item.quantity,
+        })),
+      };
+      // Call API
+      const response = await createOrder(orderRequest);
+
+      if (response.data.status === 1) { // Success
+        await Swal.fire({
+          icon: 'success',
+          title: 'Order Placed Successfully!',
+          confirmButtonText: 'OK'
         });
-        acc[item.vendorID].vendorTotal += itemTotal;
-        
-        return acc;
-      }, {} as Record<string, any>),
-    };
-    
-    console.log('Multi-vendor order to be placed:', orderData);
-    
-    // TODO: Call API to place order
-    // await placeOrder(orderData);
-    
-    alert(`Order placed successfully! ${cartItems.length} items from ${Object.keys(orderData.vendorGroups).length} vendor(s)`);
-    
-    // Clear cart after successful order
-    clearCart();
-    closeModal();
+        // Clear cart after successful order
+        clearCart();
+        closeModal();
+      } else {
+        // Handle failure
+        const errors = response.data.errors.length > 0 
+          ? response.data.errors.join(', ') 
+          : '';
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error in Placing Order',
+          confirmButtonText: 'OK'
+        });
+      }
+    } catch (error: any) {
+ await Swal.fire({
+        icon: 'error',
+        title: 'Failed to Place Order',
+        text: 'An unexpected error occurred',
+        confirmButtonText: 'OK'
+      });    }
   }}
   disabled={cartItems.length === 0}
 >

@@ -6,6 +6,6 @@ namespace Lunchmate.Core.Services
 {
     public interface IOrderService : ICrudService<Orders>
     {
-        
+        Task<Result<CreateOrderResponse>> CreateOrderAsync(CreateOrderRequest orderDto, string createdBy);
     }
 }

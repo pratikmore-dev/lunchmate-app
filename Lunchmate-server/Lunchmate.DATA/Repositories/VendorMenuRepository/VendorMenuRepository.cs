@@ -39,16 +39,7 @@ public async Task<List<VendorMenuListResponse>> GetMenusByVendor(Guid vendorId)
             IsAvailable = vm.IsAvailable,
             VendorSpecificNotes = vm.VendorSpecificNotes
         };
-
-    // 🔴 BREAKPOINT HERE
-    // Hover on `query` → you will see expression tree (not data)
-
-    // 2️⃣ Execute query and materialize data
     var result = await query.ToListAsync();
-
-    // 🔴 BREAKPOINT HERE
-    // Hover on `result` → you will see all records with MenuName populated
-
     return result;
 }
     }}

@@ -38,8 +38,6 @@ namespace Lunchmate.DATA.Models
         [ForeignKey("VendorMenuID")]
         public VendorMenu? VendorMenu { get; set; }
 
-
-
         public DateTime CreatedDate {get; set;} = DateTime.Now;
         [StringLength(100)]
 
