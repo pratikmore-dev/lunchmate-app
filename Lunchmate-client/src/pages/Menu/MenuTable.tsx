@@ -6,16 +6,15 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import { useEffect, useMemo, useRef, useState } from "react";
-import MultiSelect from "../../../src/components/form/MultiSelect";
+
 import { useModal } from "../../hooks/useModal";
 import { Modal } from "../../components/ui/modal";
-import Label from "../../components/form/Label";
-import Input from "../../components/form/input/InputField";
+
 import Button from "../../components/ui/button/Button";
 import { getFoodCategory,FoodCategory } from "../../service/foodCategory.service";
 import { getVendor, Vendor } from "../../service/vendor.service";
 import { getVendorMenu } from "../../service/vendorMenu.service";
-import { useCart,CartItem } from '../../context/CartContext';
+import { useCart } from '../../context/CartContext';
 import { createOrder, CreateOrderRequest } from '../../service/order.service';
 import Swal from 'sweetalert2';
 
