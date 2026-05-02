@@ -59,6 +59,26 @@ const [vendorMenuItems, setVendorMenuItems] = useState<VendorMenuItem[]>([]);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
  const[vendor, setVendor] = useState<Vendor[]>([]);
  const [vendorID, setVendorID] = useState("");
+
+const showOrderAlert = (options: {
+  icon: "success" | "error" | "warning";
+  title: string;
+  text?: string;
+  timer?: number;
+}) => {
+  return Swal.fire({
+    ...options,
+    timer: options.timer ?? 1800,
+    showConfirmButton: false,
+    didOpen: () => {
+      const container = document.querySelector(".swal2-container") as HTMLElement | null;
+      if (container) {
+        container.style.zIndex = "999999";
+      }
+    },
+  });
+};
+
 useEffect(() => {
   getVendor().then((res)=>{
     setVendor(res.data)
@@ -558,31 +578,28 @@ const [singleValue, setSingleValue] = useState<string>("");
       const response = await createOrder(orderRequest);
 
       if (response.data.status === 1) { // Success
-        await Swal.fire({
-          icon: 'success',
-          title: 'Order Placed Successfully!',
-          confirmButtonText: 'OK'
-        });
-        // Clear cart after successful order
         clearCart();
         closeModal();
+        await showOrderAlert({
+          icon: 'success',
+          title: 'Order Placed Successfully!',
+        });
       } else {
         // Handle failure
         const errors = response.data.errors.length > 0 
           ? response.data.errors.join(', ') 
           : '';
-        await Swal.fire({
+        await showOrderAlert({
           icon: 'error',
           title: 'Error in Placing Order',
-          confirmButtonText: 'OK'
+          text: errors || 'Please try again.',
         });
       }
     } catch (error: any) {
- await Swal.fire({
+ await showOrderAlert({
         icon: 'error',
         title: 'Failed to Place Order',
         text: 'An unexpected error occurred',
-        confirmButtonText: 'OK'
       });    }
   }}
   disabled={cartItems.length === 0}

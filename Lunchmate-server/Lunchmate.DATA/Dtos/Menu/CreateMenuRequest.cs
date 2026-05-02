@@ -28,6 +28,7 @@ namespace Lunchmate.DATA.Dtos
         [StringLength(100)]
         public string CreatedBy { get; set; }= "System";
 
+        public bool IsActive { get; set; } = true;
 
     }
 }

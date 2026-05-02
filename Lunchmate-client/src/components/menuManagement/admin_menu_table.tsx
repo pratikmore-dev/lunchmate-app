@@ -12,8 +12,10 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import Badge from "../ui/badge/Badge";
+import Swal from "sweetalert2";
 import { 
   getMenu, 
+  getMenuById,
   createMenu, 
   updateMenu, 
   deleteMenu,
@@ -30,6 +32,7 @@ export default function AdminMenuTable() {
   const [error, setError] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [formData, setFormData] = useState<CreateMenuRequest>({
     MenuName: "",
@@ -38,6 +41,25 @@ export default function AdminMenuTable() {
     IsHalfAvailable: false,
     IsActive: true
   });
+
+  const showMenuAlert = (options: {
+    icon: "success" | "error" | "warning";
+    title: string;
+    text?: string;
+    timer?: number;
+  }) => {
+    return Swal.fire({
+      ...options,
+      timer: options.timer ?? 1800,
+      showConfirmButton: false,
+      didOpen: () => {
+        const container = document.querySelector(".swal2-container") as HTMLElement | null;
+        if (container) {
+          container.style.zIndex = "999999";
+        }
+      },
+    });
+  };
 
   // Fetch menus and categories on component mount
   useEffect(() => {
@@ -68,6 +90,28 @@ export default function AdminMenuTable() {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      MenuName: "",
+      FoodCategoryID: "",
+      Description: "",
+      IsHalfAvailable: false,
+      IsActive: true
+    });
+    setIsEditMode(false);
+    setEditingId(null);
+  };
+
+  const fillFormFromMenu = (menu: Menu) => {
+    setFormData({
+      MenuName: menu.menuName,
+      FoodCategoryID: menu.foodCategoryID,
+      Description: menu.description || "",
+      IsHalfAvailable: Boolean(menu.isHalfAvailable),
+      IsActive: menu.isActive ?? true
+    });
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     
@@ -92,46 +136,59 @@ export default function AdminMenuTable() {
     }));
   };
 
-  const handleEdit = (menu: Menu) => {
+  const handleEdit = async (menu: Menu) => {
     setIsEditMode(true);
     setEditingId(menu.menuID);
-    
-    setFormData({
-      MenuName: menu.menuName,
-      FoodCategoryID: menu.foodCategoryID,
-      Description: menu.description || "",
-      IsHalfAvailable: menu.isHalfAvailable,
-      IsActive: menu.isActive
-    });
-    
+    fillFormFromMenu(menu);
     openModal();
+
+    try {
+      const response = await getMenuById(menu.menuID);
+      fillFormFromMenu(response.data);
+    } catch (err) {
+      console.error("Error fetching menu details:", err);
+    }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this menu item?")) {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Delete menu item?",
+      text: "This action cannot be undone.",
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#dc2626",
+      didOpen: () => {
+        const container = document.querySelector(".swal2-container") as HTMLElement | null;
+        if (container) {
+          container.style.zIndex = "999999";
+        }
+      },
+    });
+
+    if (result.isConfirmed) {
       try {
         await deleteMenu(id);
         await fetchMenus();
-        alert("Menu item deleted successfully!");
+        await showMenuAlert({
+          icon: "success",
+          title: "Menu deleted",
+          text: "The menu item was deleted successfully.",
+        });
       } catch (err) {
         console.error("Error deleting menu:", err);
-        alert("Failed to delete menu item");
+        await showMenuAlert({
+          icon: "error",
+          title: "Delete failed",
+          text: "Failed to delete menu item.",
+        });
       }
     }
   };
 
   const handleAddNew = () => {
-    setIsEditMode(false);
-    setEditingId(null);
-    
-    setFormData({
-      MenuName: "",
-      FoodCategoryID: "",
-      Description: "",
-      IsHalfAvailable: false,
-      IsActive: true
-    });
-    
+    resetForm();
     openModal();
   };
 
@@ -139,44 +196,59 @@ export default function AdminMenuTable() {
   
   const handleSave = async () => {
     try {
+      setIsSaving(true);
       // Validate
       if (!formData.MenuName.trim()) {
-        alert("Please enter a menu name");
+        await showMenuAlert({
+          icon: "warning",
+          title: "Menu name required",
+          text: "Please enter a menu name.",
+        });
         return;
       }
       if (!formData.FoodCategoryID) {
-        alert("Please select a category");
+        await showMenuAlert({
+          icon: "warning",
+          title: "Category required",
+          text: "Please select a category.",
+        });
         return;
       }
+
+      const successTitle = isEditMode ? "Menu updated" : "Menu created";
+      const successText = isEditMode
+        ? "The menu item was updated successfully."
+        : "The menu item was created successfully.";
 
       if (isEditMode && editingId) {
         // UPDATE
         await updateMenu(editingId, formData);
-        alert("Menu updated successfully!");
       } else {
         // CREATE
         await createMenu(formData);
-        alert("Menu created successfully!");
       }
       
       // Refresh list
       await fetchMenus();
       
       // Reset and close
-      setFormData({
-        MenuName: "",
-        FoodCategoryID: "",
-        Description: "",
-        IsHalfAvailable: false,
-        IsActive: true
-      });
-      setIsEditMode(false);
-      setEditingId(null);
+      resetForm();
       closeModal();
+      await showMenuAlert({
+        icon: "success",
+        title: successTitle,
+        text: successText,
+      });
       
     } catch (err) {
       console.error("Error saving menu:", err);
-      alert(isEditMode ? "Failed to update menu" : "Failed to create menu");
+      await showMenuAlert({
+        icon: "error",
+        title: isEditMode ? "Update failed" : "Create failed",
+        text: isEditMode ? "Failed to update menu." : "Failed to create menu.",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -275,7 +347,13 @@ export default function AdminMenuTable() {
                       {/* Menu Name */}
                       <TableCell className="px-5 py-4 text-start">
                         <span className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {menu.menuName}
+                          <button
+                            type="button"
+                            onClick={() => handleEdit(menu)}
+                            className="text-left font-medium text-brand-600 hover:text-brand-700 hover:underline dark:text-brand-400"
+                          >
+                            {menu.menuName}
+                          </button>
                         </span>
                       </TableCell>
 
@@ -312,12 +390,14 @@ export default function AdminMenuTable() {
                       <TableCell className="px-4 py-3 text-center">
                         <div className="flex justify-center gap-2">
                           <button
+                            type="button"
                             onClick={() => handleEdit(menu)}
                             className="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors dark:text-blue-400 dark:hover:bg-blue-900/20"
                           >
                             Edit
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDelete(menu.menuID)}
                             className="px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors dark:text-red-400 dark:hover:bg-red-900/20"
                           >
@@ -360,7 +440,7 @@ export default function AdminMenuTable() {
               {isEditMode ? "Edit Menu Item" : "Add New Menu Item"}
             </h4>
           </div>
-          <form className="flex flex-col">
+          <form className="flex flex-col" onSubmit={(e) => e.preventDefault()}>
             <div className="custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3">
               <div>
                 <h5 className="mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6">
@@ -398,12 +478,13 @@ export default function AdminMenuTable() {
 
                   <div className="col-span-2">
                     <Label>Description</Label>
-                    <Input 
-                      type="textarea" 
+                    <textarea
                       name="Description"
                       value={formData.Description}
                       onChange={handleInputChange}
                       placeholder="Enter description (optional)" 
+                      rows={4}
+                      className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
 
@@ -460,11 +541,11 @@ export default function AdminMenuTable() {
               </div>
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
+              <Button size="sm" variant="outline" onClick={closeModal} disabled={isSaving}>
                 Close
               </Button>
-              <Button size="sm" onClick={handleSave}>
-                Save Changes
+              <Button size="sm" onClick={handleSave} disabled={isSaving}>
+                {isSaving ? "Saving..." : isEditMode ? "Update Menu" : "Create Menu"}
               </Button>
             </div>
           </form>

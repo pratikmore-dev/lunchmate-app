@@ -21,8 +21,8 @@ namespace Lunchmate.DATA.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public IQueryable<T> GetAll() => _context.Set<T>();
-        public async Task<T> GetByIdAsync(object id) => await _dbSet.FindAsync(id);
+        public virtual IQueryable<T> GetAll() => _context.Set<T>();
+        public virtual async Task<T> GetByIdAsync(object id) => await _dbSet.FindAsync(id);
         public async Task<T> AddAsync(T entity) { await _dbSet.AddAsync(entity); await _context.SaveChangesAsync(); return entity; }
         public async Task<T> UpdateAsync(T entity) { _dbSet.Update(entity); await _context.SaveChangesAsync(); return entity; }
         public async Task DeleteAsync(object id)

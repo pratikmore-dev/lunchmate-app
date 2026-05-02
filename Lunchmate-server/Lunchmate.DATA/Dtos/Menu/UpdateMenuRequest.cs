@@ -27,5 +27,7 @@ namespace Lunchmate.DATA.Dtos
         public string? LastModifiedBy { get; set; }
         public DateTime? LastModifiedDate { get; set; } 
 
+        public bool IsActive { get; set; } = true;
+
     }
 }

@@ -26,7 +26,7 @@ namespace Lunchmate.Core.Mappers
             CreateMap<UpdateMenuRequest, Lunchmate.DATA.Models.Menu>();
             CreateMap<Lunchmate.DATA.Models.Menu,CreateMenuResponse>();
             CreateMap<Lunchmate.DATA.Models.Menu,  UpdateMenuResponse>();
-            CreateMap<Lunchmate.DATA.Models.Menu, FoodCategoryListResponse>();
+            CreateMap<Lunchmate.DATA.Models.Menu, FoodMenuResponse>();
 
             // OrderItem mappings
             CreateMap<CreateOrderItemRequest, OrderItems>();

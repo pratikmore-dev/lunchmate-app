@@ -31,11 +31,18 @@ namespace Lunchmate.DATA.Repositories
         // }
 
            
-    public new IQueryable<Menu> GetAll()
-    {
-        return _context.Menu
-            .Include(m => m.FoodCategory);  
-    }
+        public override IQueryable<Menu> GetAll()
+        {
+            return _context.Menu
+                .Include(m => m.FoodCategory);
+        }
+
+        public override async Task<Menu> GetByIdAsync(object id)
+        {
+            return await _context.Menu
+                .Include(m => m.FoodCategory)
+                .FirstOrDefaultAsync(m => m.MenuID == (Guid)id);
+        }
        
     }
 

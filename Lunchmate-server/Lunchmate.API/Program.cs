@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Lunchmate.DATA.Data;
 using Microsoft.EntityFrameworkCore;
 using Lunchmate.Core.Services;
@@ -58,7 +59,11 @@ builder.Services.AddSingleton(mapper);
 builder.Services.AddDbContext<LunchmateDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 builder.Services.AddCors(options =>
 {

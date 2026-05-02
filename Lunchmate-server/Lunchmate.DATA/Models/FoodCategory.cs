@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 
 namespace Lunchmate.DATA.Models
@@ -22,6 +23,7 @@ namespace Lunchmate.DATA.Models
         public string? Description { get; set; }
 
         //Navigation property for related FoodItems
+        [JsonIgnore]
          public ICollection<Menu>? Menus { get; set; }
 
         public DateTime CreatedDate { get; set; }= DateTime.Now;
